@@ -10,11 +10,15 @@ from __future__ import annotations
 import html
 import math
 
-from github_stats.config import (FIELD_DAYS, FIELD_H, FIELD_OX, FIELD_OY, FIELD_THEMES,
-                                 FIELD_TW, FIELD_TH, FIELD_W, FIELD_WEEKS, FIELD_Z,
-                                 MONTHS)
+from github_stats.config import (FIELD_DAYS, FIELD_H, FIELD_MAX_H, FIELD_OX, FIELD_OY,
+                                 FIELD_TW, FIELD_TH, FIELD_W, FIELD_WEEKS, MONTHS)
 
 Point = tuple[float, float]
+
+# Column heights are normalised, not linear in the raw count: a day with 400
+# contributions and a day with 4 must both be visible on a 400px canvas, and a
+# little compression reads as a landscape rather than a wall of spikes.
+HEIGHT_CURVE = 0.65
 
 
 def _iso(week: float, day: float, height: float = 0.0) -> Point:
@@ -35,9 +39,9 @@ def _level(count: int, cuts: list[int]) -> int:
     return 0
 
 
-def _column(week: int, day: int, count: int, palette: dict, cuts: list[int]):
+def _column(week: int, day: int, count: int, peak: int, palette: dict, cuts: list[int]):
     """One tile: two side faces (only when it has height) and a top face."""
-    height = count * FIELD_Z
+    height = FIELD_MAX_H * (count / peak) ** HEIGHT_CURVE if count else 0.0
     top = _iso(week, day, height)
     right = _iso(week + 1, day, height)
     front = _iso(week, day + 1, height)
@@ -69,9 +73,8 @@ def _column(week: int, day: int, count: int, palette: dict, cuts: list[int]):
     return (week - day, faces)                        # sort key: back to front
 
 
-def field_svg(mode: str, calendar: dict) -> str:
-    """Draw the whole field for one theme."""
-    palette = FIELD_THEMES[mode]
+def field_svg(palette: dict, calendar: dict) -> str:
+    """Draw the whole field for one resolved palette."""
     weeks = calendar["weeks"]
     days = [day for week in weeks for day in week["contributionDays"]]
     peak = max(day["contributionCount"] for day in days) or 1
@@ -79,7 +82,7 @@ def field_svg(mode: str, calendar: dict) -> str:
                    for fraction in (.10, .25, .48, .75)})
 
     columns = [
-        _column(week_index, day_index, day["contributionCount"], palette, cuts)
+        _column(week_index, day_index, day["contributionCount"], peak, palette, cuts)
         for week_index, week in enumerate(weeks)
         for day_index, day in enumerate(week["contributionDays"])
     ]
@@ -133,7 +136,7 @@ def field_svg(mode: str, calendar: dict) -> str:
 <linearGradient id="cbg" x1="0" y1="0" x2="1" y2="1">
   <stop offset="0" stop-color="{palette['bg0']}"/><stop offset="1" stop-color="{palette['bg1']}"/></linearGradient>
 <filter id="cglow" x="-12%" y="-12%" width="124%" height="128%">
-  <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#7C3AED" flood-opacity=".3"/></filter>
+  <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="{palette['glow']}" flood-opacity=".3"/></filter>
 <linearGradient id="cscrim" x1="0" y1="0" x2="1" y2="1">
   <stop offset="0" stop-color="{palette['bg0']}" stop-opacity=".96"/>
   <stop offset=".5" stop-color="{palette['bg0']}" stop-opacity=".72"/>

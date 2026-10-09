@@ -8,15 +8,14 @@ from __future__ import annotations
 
 import html
 
-from github_stats.config import CARD_THEMES, MONO
+from github_stats.config import MONO
 
 SIZES = {"streak": (520, 200), "activity": (880, 250), "field": (900, 400)}
 
 
-def error_card(kind: str, mode: str, message: str) -> str:
+def error_card(kind: str, palette: dict, message: str) -> str:
     """A drawable card carrying the reason, in the size the caller expected."""
     width, height = SIZES.get(kind, (520, 200))
-    palette = CARD_THEMES.get(mode, CARD_THEMES["dark"])
     reason = html.escape(message[:70])
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-labelledby="et ed">
 <title id="et">Stats unavailable</title>
