@@ -134,9 +134,14 @@ def field_svg(mode: str, calendar: dict) -> str:
   <stop offset="0" stop-color="{palette['bg0']}"/><stop offset="1" stop-color="{palette['bg1']}"/></linearGradient>
 <filter id="cglow" x="-12%" y="-12%" width="124%" height="128%">
   <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#7C3AED" flood-opacity=".3"/></filter>
+<linearGradient id="cscrim" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="{palette['bg0']}" stop-opacity=".96"/>
+  <stop offset=".5" stop-color="{palette['bg0']}" stop-opacity=".72"/>
+  <stop offset="1" stop-color="{palette['bg0']}" stop-opacity="0"/></linearGradient>
 </defs>
 <rect width="{FIELD_W}" height="{FIELD_H}" fill="url(#cbg)"/>
 <g filter="url(#cglow)">{plane}{"".join(column[1] for column in columns)}</g>
+<rect width="470" height="190" fill="url(#cscrim)"/>
 {"".join(ticks)}
 <text x="30" y="56" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" letter-spacing="3" fill="{palette['dim']}">CONTRIBUTION FIELD &#183; LAST 12 MONTHS</text>
 <text x="30" y="118" font-family="'Segoe UI',system-ui,-apple-system,Arial,sans-serif" font-size="46" font-weight="800" fill="{palette['total']}">{html.escape(total)}</text>
