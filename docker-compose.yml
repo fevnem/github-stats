@@ -1,0 +1,14 @@
+services:
+  github-stats:
+    build: .
+    image: github-stats
+    container_name: github-stats
+    restart: unless-stopped
+    ports:
+      # bind to localhost and put a reverse proxy in front, or drop 127.0.0.1
+      # to expose it on every interface
+      - "127.0.0.1:8000:8000"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      # optional: only used if the public calendar page cannot be parsed
+      # GH_TOKEN: ""

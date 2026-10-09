@@ -1,0 +1,2 @@
+# Standard library only: there is nothing to install.
+# This file exists so Python hosts (Vercel, PaaS builders) detect the runtime.
